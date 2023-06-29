@@ -3,30 +3,28 @@
 	"id": "mc-fix-hardcoded-lava-level",
 	"version": "${version}",
 	"name": "mc fix hardcoded lava level",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "changes hardcoded -54 lava level to hardcoded -117 blocks under sea level",
 	"authors": [
-		"Me!"
+		"Matteo_fey"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/warior456/mc-fix-hardcoded-lava-level",
+		"sources": "hhttps://github.com/warior456/mc-fix-hardcoded-lava-level"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/mc-fix-hardcoded-lava-level/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"ugi.mc_fix_hardcoded_lava_level.ExampleMod"
 		]
 	},
 	"mixins": [
 		"mc-fix-hardcoded-lava-level.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.14.21",
-		"minecraft": "~1.18",
-		"java": ">=17",
-		"fabric-api": "*"
+		"fabricloader": ">=0.14.17",
+		"minecraft": ">=1.19.3",
+		"java": ">=17"
 	},
 	"suggests": {
 		"another-mod": "*"
