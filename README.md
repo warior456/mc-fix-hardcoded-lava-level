@@ -1,5 +1,7 @@
 # mc-fix-hardcoded-lava-level
-a fix for the hardcoded lava level that doesn't break normal lava gen like https://github.com/Andrew6rant/MC-237017-Fix
+Minecraft mod to fix [MC-237017](https://bugs.mojang.com/browse/MC-237017) (All caves are filled with lava at and below Y value -54) but doesn't break vanilla lava gen like [https://github.com/Andrew6rant/MC-237017-Fix](https://github.com/Andrew6rant/MC-237017-Fix)
+
+This mod is server-side only, and does not require anything on the client.
 
 ## caveats: 
 this fix changes the hardcoded lava level from -54 to 117 blocks under sea level, this should fix a lot of custom dimensions but some extreme one might not be fixed with this
