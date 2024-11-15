@@ -16,6 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
+			"ugi.mc_fix_hardcoded_lava_level.FixHardCodedLavaLevel"
 		]
 	},
 	"mixins": [
