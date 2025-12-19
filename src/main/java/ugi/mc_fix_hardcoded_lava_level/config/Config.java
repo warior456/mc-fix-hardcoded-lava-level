@@ -12,6 +12,8 @@ import java.io.IOException;
 
 
 public class Config {
+    public static final int CURRENT_CONFIG_VERSION = 2; // Used to validate version.
+
     public static void loadConfig() {
         File configFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), FixHardCodedLavaLevel.MOD_ID + "_config.json");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -20,20 +22,42 @@ public class Config {
                 FileReader fileReader = new FileReader(configFile);
                 FixHardCodedLavaLevel.CONFIG = gson.fromJson(fileReader, ConfigHandler.class);
                 fileReader.close();
-                saveConfig(); //update config
+                // if version outdated, do not load
+                if (FixHardCodedLavaLevel.CONFIG.config_Version != CURRENT_CONFIG_VERSION)
+                {
+                    FixHardCodedLavaLevel.LOGGER.error("Ignoring Config. Expected version: {}, Got: {}", CURRENT_CONFIG_VERSION, FixHardCodedLavaLevel.CONFIG.config_Version);
+                    if (FixHardCodedLavaLevel.CONFIG.config_Version < CURRENT_CONFIG_VERSION)
+                    {
+                        FixHardCodedLavaLevel.LOGGER.info("Try recreating the config, remember your settings!");
+                    }
+                    else if (FixHardCodedLavaLevel.CONFIG.config_Version > CURRENT_CONFIG_VERSION)
+                    {
+                        // Brain rot
+                        FixHardCodedLavaLevel.LOGGER.warn("The config version is somehow greater, that's sus.");
+                    }
+                    // Ignore the config and use the default instead. DO NOT SAVE IT OR IT WILL OVERWRITE
+                    FixHardCodedLavaLevel.CONFIG = new ConfigHandler();
+                }
+                else
+                {
+                    saveConfig(); // Update config
+                }
             } catch (IOException e) {
-                FixHardCodedLavaLevel.LOGGER.warn("the config was not loaded: " + e.getLocalizedMessage());
+	            FixHardCodedLavaLevel.LOGGER.warn("The config file: {} was not loaded", e.getLocalizedMessage());
             }
         } else {
+            // Create the config
             FixHardCodedLavaLevel.CONFIG = new ConfigHandler();
             saveConfig();
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void saveConfig() {
         File configFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), FixHardCodedLavaLevel.MOD_ID + "_config.json");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         if (!configFile.getParentFile().exists()) {
+            // Make the directory
             configFile.getParentFile().mkdir();
         }
         try {
@@ -41,7 +65,7 @@ public class Config {
             fileWriter.write(gson.toJson(FixHardCodedLavaLevel.CONFIG));
             fileWriter.close();
         } catch (IOException e) {
-            FixHardCodedLavaLevel.LOGGER.warn("the config was not saved: " + e.getLocalizedMessage());
+	        FixHardCodedLavaLevel.LOGGER.warn("Config was not saved to: {}", e.getLocalizedMessage());
         }
     }
 }
