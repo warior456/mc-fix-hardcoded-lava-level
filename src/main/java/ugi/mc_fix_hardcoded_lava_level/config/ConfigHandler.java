@@ -4,4 +4,6 @@ public class ConfigHandler {
     public int config_Version = 2;
     // Default to 117, (+63 - -54, the vanilla distance)
     public int vertical_Sea_To_Lava_Separation = 117;
+    // Output more detailed information
+    public boolean verbose_Mode = false;
 }

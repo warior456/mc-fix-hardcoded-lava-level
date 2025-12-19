@@ -26,14 +26,17 @@ public class Config {
                 if (FixHardCodedLavaLevel.CONFIG.config_Version != CURRENT_CONFIG_VERSION)
                 {
                     FixHardCodedLavaLevel.LOGGER.error("Ignoring Config. Expected version: {}, Got: {}", CURRENT_CONFIG_VERSION, FixHardCodedLavaLevel.CONFIG.config_Version);
-                    if (FixHardCodedLavaLevel.CONFIG.config_Version < CURRENT_CONFIG_VERSION)
+                    if (FixHardCodedLavaLevel.CONFIG.verbose_Mode)
                     {
-                        FixHardCodedLavaLevel.LOGGER.info("Try recreating the config, remember your settings!");
-                    }
-                    else if (FixHardCodedLavaLevel.CONFIG.config_Version > CURRENT_CONFIG_VERSION)
-                    {
-                        // Brain rot
-                        FixHardCodedLavaLevel.LOGGER.warn("The config version is somehow greater, that's sus.");
+                        if (FixHardCodedLavaLevel.CONFIG.config_Version < CURRENT_CONFIG_VERSION)
+                        {
+                            FixHardCodedLavaLevel.LOGGER.info("Try recreating the config, remember your settings!");
+                        }
+                        else if (FixHardCodedLavaLevel.CONFIG.config_Version > CURRENT_CONFIG_VERSION)
+                        {
+                            // Brain rot
+                            FixHardCodedLavaLevel.LOGGER.warn("The config version is somehow greater, that's sus.");
+                        }
                     }
                     // Ignore the config and use the default instead. DO NOT SAVE IT OR IT WILL OVERWRITE
                     FixHardCodedLavaLevel.CONFIG = new ConfigHandler();
