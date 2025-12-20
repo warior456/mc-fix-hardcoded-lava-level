@@ -10,6 +10,7 @@ import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Unique;
 import ugi.mc_fix_hardcoded_lava_level.FixHardCodedLavaLevel;
 
 @Mixin({NoiseChunkGenerator.class})
@@ -23,7 +24,8 @@ public abstract class NoiseChunkGeneratorMixin {
     @Overwrite
     private static AquiferSampler.FluidLevelSampler createFluidLevelSampler(ChunkGeneratorSettings settings) {
         int seaLevelSetting = settings.seaLevel();
-        int configuredBottomLevelSetting = seaLevelSetting - FixHardCodedLavaLevel.CONFIG.vertical_Sea_To_Lava_Separation;
+        int configuredBottomLevelSetting = getConfiguredBottomLevelSetting(seaLevelSetting);
+        FixHardCodedLavaLevel.LOGGER.info("Dimension Min Height: {}", DimensionType.MIN_HEIGHT);
 
         // Fluid Sampler for the bottom Lava fill (the purpose of this mod)
         AquiferSampler.FluidLevel bottomFluidLevel = new AquiferSampler.FluidLevel(configuredBottomLevelSetting, Blocks.LAVA.getDefaultState());
@@ -37,7 +39,8 @@ public abstract class NoiseChunkGeneratorMixin {
                 return disabledFluidLevel;
             }
             // If y-coordinate is below the bottom lava fill (or if the sea level is lower than that, use that)
-            else if (y < Math.min(configuredBottomLevelSetting, seaLevelSetting)) {
+            // Also restrict the value to within the world's minimum height
+            else if (y < Math.max(Math.min(configuredBottomLevelSetting, seaLevelSetting), DimensionType.MIN_HEIGHT)) {
                 return bottomFluidLevel;
             }
             else
@@ -45,5 +48,18 @@ public abstract class NoiseChunkGeneratorMixin {
                 return seaLevelFluid;
             }
         };
+    }
+
+    @Unique
+    private static int getConfiguredBottomLevelSetting(int seaLevelSetting)
+    {
+        return switch (FixHardCodedLavaLevel.CONFIG.vertical_Reference_Type)
+        {
+	        case BELOW_SEA_LEVEL ->
+			        seaLevelSetting - FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+	        case ABOVE_BOTTOM ->
+			        DimensionType.MIN_HEIGHT + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+	        case ABSOLUTE -> FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+        }; // set to the old default
     }
 }
