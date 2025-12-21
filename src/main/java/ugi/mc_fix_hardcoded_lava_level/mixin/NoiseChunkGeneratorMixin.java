@@ -4,7 +4,7 @@ package ugi.mc_fix_hardcoded_lava_level.mixin;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.block.Blocks;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.*;
 import net.minecraft.world.gen.chunk.AquiferSampler;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
@@ -23,14 +23,12 @@ public abstract class NoiseChunkGeneratorMixin {
      */
     @Overwrite
     private static AquiferSampler.FluidLevelSampler createFluidLevelSampler(ChunkGeneratorSettings settings) {
-        int seaLevelSetting = settings.seaLevel();
-        int configuredBottomLevelSetting = getConfiguredBottomLevelSetting(seaLevelSetting);
-        FixHardCodedLavaLevel.LOGGER.info("Dimension Min Height: {}", DimensionType.MIN_HEIGHT);
+        int configuredBottomLevelSetting = getConfiguredBottomLevelSetting(settings);
 
         // Fluid Sampler for the bottom Lava fill (the purpose of this mod)
         AquiferSampler.FluidLevel bottomFluidLevel = new AquiferSampler.FluidLevel(configuredBottomLevelSetting, Blocks.LAVA.getDefaultState());
         // Fluid Sampler for the Sea Level fill
-        AquiferSampler.FluidLevel seaLevelFluid = new AquiferSampler.FluidLevel(seaLevelSetting, settings.defaultFluid());
+        AquiferSampler.FluidLevel seaLevelFluid = new AquiferSampler.FluidLevel(settings.seaLevel(), settings.defaultFluid());
         // Fluid Sampler used when sea level and aquifers are disabled, I guess?
         AquiferSampler.FluidLevel disabledFluidLevel = new AquiferSampler.FluidLevel(DimensionType.MIN_HEIGHT * 2, Blocks.AIR.getDefaultState());
         return (x, y, z) -> {
@@ -40,7 +38,7 @@ public abstract class NoiseChunkGeneratorMixin {
             }
             // If y-coordinate is below the bottom lava fill (or if the sea level is lower than that, use that)
             // Also restrict the value to within the world's minimum height
-            else if (y < Math.max(Math.min(configuredBottomLevelSetting, seaLevelSetting), DimensionType.MIN_HEIGHT)) {
+            else if (y < Math.max(Math.min(configuredBottomLevelSetting, settings.seaLevel()), DimensionType.MIN_HEIGHT)) {
                 return bottomFluidLevel;
             }
             else
@@ -50,15 +48,21 @@ public abstract class NoiseChunkGeneratorMixin {
         };
     }
 
+
+    /**
+     * @author mrburgerUS (@mrburger)
+     *  Retrieve the correct y-level for the Aquifer of lava at the bottom of a world
+     * @return an int for the y-level
+     */
     @Unique
-    private static int getConfiguredBottomLevelSetting(int seaLevelSetting)
+    private static int getConfiguredBottomLevelSetting(ChunkGeneratorSettings settings)
     {
         return switch (FixHardCodedLavaLevel.CONFIG.vertical_Reference_Type)
         {
 	        case BELOW_SEA_LEVEL ->
-			        seaLevelSetting - FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+			        settings.seaLevel() - FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
 	        case ABOVE_BOTTOM ->
-			        DimensionType.MIN_HEIGHT + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+                    settings.generationShapeConfig().minimumY() + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
 	        case ABSOLUTE -> FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
         }; // set to the old default
     }
