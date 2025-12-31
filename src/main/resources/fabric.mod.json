@@ -2,14 +2,15 @@
 	"schemaVersion": 1,
 	"id": "mc-fix-hardcoded-lava-level",
 	"version": "${version}",
-	"name": "mc fix hardcoded lava level",
-	"description": "changes hardcoded -54 lava level to hardcoded -117 blocks under sea level",
+	"name": "MC Fix Hardcoded Lava Level",
+	"description": "Changes the hardcoded -54 lava level to a user-configurable value.",
 	"authors": [
-		"Matteo_fey"
+		"Matteo_fey",
+		"mrburgerUS"
 	],
 	"contact": {
 		"homepage": "https://github.com/warior456/mc-fix-hardcoded-lava-level",
-		"sources": "hhttps://github.com/warior456/mc-fix-hardcoded-lava-level"
+		"sources": "https://github.com/warior456/mc-fix-hardcoded-lava-level"
 	},
 	"license": "MIT",
 	"icon": "assets/mc-fix-hardcoded-lava-level/icon.png",
@@ -23,9 +24,9 @@
 		"mc-fix-hardcoded-lava-level.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.14.17",
-		"minecraft": ">=1.19.3",
-		"java": ">=17"
+		"fabricloader": ">=0.18.3",
+		"minecraft": ">=1.21.11",
+		"java": ">=21"
 	},
 	"suggests": {
 		"another-mod": "*"
