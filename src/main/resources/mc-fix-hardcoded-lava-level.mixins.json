@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "ugi.mc_fix_hardcoded_lava_level.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_25",
   "mixins": [
     "NoiseChunkGeneratorMixin"
   ],

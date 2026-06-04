@@ -3,17 +3,17 @@ package ugi.mc_fix_hardcoded_lava_level.mixin;
 
 
 import net.minecraft.SharedConstants;
-import net.minecraft.block.Blocks;
-import net.minecraft.world.dimension.*;
-import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 import ugi.mc_fix_hardcoded_lava_level.FixHardCodedLavaLevel;
 
-@Mixin({NoiseChunkGenerator.class})
+@Mixin({NoiseBasedChunkGenerator.class})
 public abstract class NoiseChunkGeneratorMixin {
 
     /**
@@ -22,23 +22,23 @@ public abstract class NoiseChunkGeneratorMixin {
      * @reason Replace -54 Lava level with configuration
      */
     @Overwrite
-    private static AquiferSampler.FluidLevelSampler createFluidLevelSampler(ChunkGeneratorSettings settings) {
+    private static Aquifer.FluidPicker createFluidPicker(NoiseGeneratorSettings settings) {
         int configuredBottomLevelSetting = getConfiguredBottomLevelSetting(settings);
 
         // Fluid Sampler for the bottom Lava fill (the purpose of this mod)
-        AquiferSampler.FluidLevel bottomFluidLevel = new AquiferSampler.FluidLevel(configuredBottomLevelSetting, Blocks.LAVA.getDefaultState());
+        Aquifer.FluidStatus bottomFluidLevel = new Aquifer.FluidStatus(configuredBottomLevelSetting, Blocks.LAVA.defaultBlockState());
         // Fluid Sampler for the Sea Level fill
-        AquiferSampler.FluidLevel seaLevelFluid = new AquiferSampler.FluidLevel(settings.seaLevel(), settings.defaultFluid());
+        Aquifer.FluidStatus seaLevelFluid = new Aquifer.FluidStatus(settings.seaLevel(), settings.defaultFluid());
         // Fluid Sampler used when sea level and aquifers are disabled, I guess?
-        AquiferSampler.FluidLevel disabledFluidLevel = new AquiferSampler.FluidLevel(DimensionType.MIN_HEIGHT * 2, Blocks.AIR.getDefaultState());
+        Aquifer.FluidStatus disabledFluidLevel = new Aquifer.FluidStatus(DimensionType.MIN_Y * 2, Blocks.AIR.defaultBlockState());
         return (x, y, z) -> {
-            if (SharedConstants.DISABLE_FLUID_GENERATION)
+            if (SharedConstants.DEBUG_DISABLE_FLUID_GENERATION)
             {
                 return disabledFluidLevel;
             }
             // If y-coordinate is below the bottom lava fill (or if the sea level is lower than that, use that)
             // Also restrict the value to within the world's minimum height
-            else if (y < Math.max(Math.min(configuredBottomLevelSetting, settings.seaLevel()), DimensionType.MIN_HEIGHT)) {
+            else if (y < Math.max(Math.min(configuredBottomLevelSetting, settings.seaLevel()), DimensionType.MIN_Y)) {
                 return bottomFluidLevel;
             }
             else
@@ -55,14 +55,14 @@ public abstract class NoiseChunkGeneratorMixin {
      * @return an int for the y-level
      */
     @Unique
-    private static int getConfiguredBottomLevelSetting(ChunkGeneratorSettings settings)
+    private static int getConfiguredBottomLevelSetting(NoiseGeneratorSettings settings)
     {
         return switch (FixHardCodedLavaLevel.CONFIG.vertical_Reference_Type)
         {
 	        case BELOW_SEA_LEVEL ->
 			        settings.seaLevel() - FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
 	        case ABOVE_BOTTOM ->
-                    settings.generationShapeConfig().minimumY() + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+                    settings.noiseSettings().minY() + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
 	        case ABSOLUTE -> FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
         }; // set to the old default
     }
