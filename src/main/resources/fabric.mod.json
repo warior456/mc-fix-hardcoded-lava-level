@@ -24,8 +24,8 @@
 		"mc-fix-hardcoded-lava-level.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.14.17",
-		"minecraft": ">=1.19.3",
-		"java": ">=21"
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.1.2",
+		"java": ">=25"
 	}
 }
