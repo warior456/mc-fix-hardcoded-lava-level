@@ -13,8 +13,11 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 import ugi.mc_fix_hardcoded_lava_level.FixHardCodedLavaLevel;
 
+import java.util.Objects;
+
 @Mixin({NoiseBasedChunkGenerator.class})
 public abstract class NoiseChunkGeneratorMixin {
+
 
     /**
      * @author Matteo_fey (@warior456)
@@ -31,7 +34,7 @@ public abstract class NoiseChunkGeneratorMixin {
         Aquifer.FluidStatus seaLevelFluid = new Aquifer.FluidStatus(settings.seaLevel(), settings.defaultFluid());
         // Fluid Sampler used when sea level and aquifers are disabled, I guess?
         Aquifer.FluidStatus disabledFluidLevel = new Aquifer.FluidStatus(DimensionType.MIN_Y * 2, Blocks.AIR.defaultBlockState());
-        return (x, y, z) -> {
+        return (_, y, _) -> {
             if (SharedConstants.DEBUG_DISABLE_FLUID_GENERATION)
             {
                 return disabledFluidLevel;
@@ -57,13 +60,17 @@ public abstract class NoiseChunkGeneratorMixin {
     @Unique
     private static int getConfiguredBottomLevelSetting(NoiseGeneratorSettings settings)
     {
-        return switch (FixHardCodedLavaLevel.CONFIG.vertical_Reference_Type)
-        {
-	        case BELOW_SEA_LEVEL ->
-			        settings.seaLevel() - FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
-	        case ABOVE_BOTTOM ->
-                    settings.noiseSettings().minY() + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
-	        case ABSOLUTE -> FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
-        }; // set to the old default
+        // Added this section if the JSON key is NOT defined for the world.
+	    return Objects.requireNonNullElseGet(
+                FixHardCodedLavaLevel.overworldBottomLavaLevel, () ->
+                        switch (FixHardCodedLavaLevel.CONFIG.vertical_Reference_Type)
+	                    {
+                            case BELOW_SEA_LEVEL ->
+                                    settings.seaLevel() - FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+                            case ABOVE_BOTTOM ->
+                                    settings.noiseSettings().minY() + FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+                            case ABSOLUTE -> FixHardCodedLavaLevel.CONFIG.vertical_Reference_To_Lava_Separation;
+                        }
+        );
     }
 }
